@@ -1,20 +1,25 @@
-import './App.css';
-import Booklist from './component/Booklist';
+import BookList from './component/BookList';
+import AddBook from './component/AddBook'
 //apollo client
-import ApolloClient from '@apollo/client';
-import {ApolloProvider} from '@apollo/client'
+import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client'
+
 
 function App() {
 
-  // const client = new ApolloClient({
-  //   uri: 'http://http://localhost:4000/graphql?'
-  // })
+  const client = new ApolloClient({
+    uri: 'http://localhost:4000/graphql',
+    cache: new InMemoryCache()
+  })
 
   return (
-    <div className="App">
-     <h1>Ninja Reading List</h1>
-     <Booklist/>
-    </div>
+// ApolloProvider wraps the tags
+    <ApolloProvider client={client}>  
+      <div className="App">
+        <h1>Ninja Reading List</h1>
+        <BookList/>
+        <AddBook/>
+      </div>
+    </ApolloProvider>
   );
 }
 
