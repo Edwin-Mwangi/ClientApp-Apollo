@@ -1,5 +1,5 @@
-import { useQuery } from '@apollo/client';
-import { getAuthorsQuery } from '../queries/queries';
+import { useQuery, useMutation } from '@apollo/client';
+import { getAuthorsQuery, addBookMutation, getBooksQuery } from '../queries/queries';
 import { useState } from 'react';
 
 //functional component
@@ -9,24 +9,35 @@ const AddBook = () => {
     const [genre, setGenre] = useState('')
     const [authorId, setAuthorId] = useState('')
 
+     //running the query to get data
+     const{ data, loading, error } = useQuery(getAuthorsQuery);
+
+     //display author options
+     const displayAuthors = () => {
+         if(loading) return(<option disabled>Loading Authors...</option>)
+         if(error) return(<option disabled>{error.message}</option>)
+         else{
+             return data.authors.map( author => {
+                 return(<option key={ author.id }
+                                value={ author.id }
+                             >{ author.name }</option>)
+             })
+         }
+     }
+
+     //define func to run mutation
+     const [addBook] = useMutation(addBookMutation, {
+        variables: {name, genre, authorId },
+        refetchQueries: [{query: getBooksQuery}]
+     })
+
     const submitForm = (e) => {
         e.preventDefault()
-        console.log(`Name: ${name} Age: ${genre} AuthorId: ${authorId}`)
-    }
-
-    //running the query to get data
-    const{ data, loading, error } = useQuery(getAuthorsQuery);
-
-    const displayAuthors = () => {
-        if(loading) return(<option disabled>Loading Authors...</option>)
-        if(error) return(<option disabled>{error.message}</option>)
-        else{
-            return data.authors.map( author => {
-                return(<option key={ author.id }
-                               value={ author.id }
-                            >{ author.name }</option>)
-            })
-        }
+        // console.log(`Name: ${name} genre: ${genre} AuthorId: ${ authorId }`)
+        addBook(name, genre, authorId);
+        setName(''); 
+        setGenre('');
+        setAuthorId('');
     }
 
     return ( 
