@@ -26,9 +26,10 @@ const AddBook = () => {
      }
 
      //define func to run mutation
+     //refetch queries displays updates in DOM automatically
      const [addBook] = useMutation(addBookMutation, {
         variables: {name, genre, authorId },
-        refetchQueries: [{query: getBooksQuery}]
+        refetchQueries: [{query: getBooksQuery}] //could also update cache
      })
 
     const submitForm = (e) => {
