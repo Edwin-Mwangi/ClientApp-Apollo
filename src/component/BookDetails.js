@@ -1,9 +1,10 @@
-import { useQuery } from '@apollo/client';
-import { getBookQuery } from '../queries/queries';
+import { useMutation, useQuery } from '@apollo/client';
+import { deleteBookMutation, getBookQuery, getBooksQuery } from '../queries/queries';
 
 //functional component
 const BookDetails = ({ bookId }) => {
     const {loading, error, data } = useQuery(getBookQuery, {
+        //specify the key as id
         variables: { id: bookId }
     });
     // console.log(`loading: ${loading}\ndata: ${data}\nerror: ${error}`)
@@ -15,9 +16,9 @@ const BookDetails = ({ bookId }) => {
         if(loading){
             return ( <div>Loading books...</div> )
         }
-        if(error){
-            return ( <div>Error: {error.message}</div> )
-        }
+        // if(error){
+        //     return ( <div>Error: {error.message}</div> )
+        // }
         else {
             if(bookId !== null){
                 let book = data.book;
@@ -31,12 +32,27 @@ const BookDetails = ({ bookId }) => {
                                 return <li key={item.id}>{item.name}</li>
                             })}
                         </ul>
+                        {/* only step left is to remove book details after btn click */}
+                        <button onClick={deleteBook}>Delete</button>
                     </div>
                 )
             }
         }
-
     }
+
+    const [deleteBook] = useMutation(deleteBookMutation,{
+        variables: {id: bookId},
+        //faster alternative to refetchQueries
+        update( cache, { data: { deleteBook } }) {
+            const { books } = cache.readQuery({ query: getBooksQuery });
+            //deleteBook return an obj with id,name,genre(check query)
+            cache.writeQuery({ 
+                query: getBooksQuery,
+                data: { books: books.filter(book => book.id !== deleteBook.id) }
+                })
+        },
+    })
+
 
     return ( 
         <div id='book-details'>
